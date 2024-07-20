@@ -1,0 +1,38 @@
+{{- if .Values.scVerifier.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "blockscout-stack.fullname" . }}-sc-verifier-svc
+  labels:
+    app: {{ .Release.Name }}-sc-verifier-svc
+spec:
+  type: {{ .Values.scVerifier.service.type}}
+  ports:
+  {{- range $key, $value := .Values.scVerifier.ports.http }}
+    - port: {{ toYaml $value.number | indent 2 }}
+      targetPort: {{ toYaml $value.number | indent 2 }}
+      protocol: {{ toYaml $value.protocol | indent 2 }}
+      name: {{ $key }}
+  {{- end }}
+  selector:
+    app: {{ .Release.Name }}-sc-verifier
+---
+{{- if .Values.scVerifier.ports.grpc.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "blockscout-stack.fullname" . }}-sc-verifier-grpc-svc
+  labels:
+    app: {{ .Release.Name }}-sc-verifier-grpc-svc
+    {{- include "blockscout-stack.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.scVerifier.service.type}}
+  ports:
+    - port: {{ toYaml .Values.scVerifier.ports.grpc.number | indent 2 }}
+      targetPort: {{ toYaml .Values.scVerifier.ports.grpc.number | indent 2 }}
+      protocol: {{ toYaml .Values.scVerifier.ports.grpc.protocol | indent 2 }}
+      name: grpc
+  selector:
+    app: {{ .Release.Name }}-sc-verifier
+{{- end }}
+{{- end }}
